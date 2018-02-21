@@ -1,0 +1,4 @@
+auth.py
+google_transit.zip
+google_transit/
+*.pyc
