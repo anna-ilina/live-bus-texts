@@ -20,8 +20,8 @@ def sms():
 
     stopNo, routeNo = parseStopAndRouteInput(message_body)
 
-    print("stopNo = " + stopNo)
-    print("routeNo = " + routeNo)
+    print("stopNo = " + str(stopNo))
+    print("routeNo = " + str(routeNo))
     r = getNextTripsForStop(routeNo, stopNo)    #todo: reverse order of params for consistency
     print("r = " + str(r))
     trips = parseNextTripsForStop(r)
