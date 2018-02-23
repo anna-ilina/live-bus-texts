@@ -155,10 +155,9 @@ def getBusStopInput(cityBusStops):
             except:
                 print("Unable to find stop with given name. Please try again.")
 
-
-def getBusStopNameFromStopCode(stopNo, cityBusStops):
-    cityBusStopNumbers = [int(x) if x != '' else x for x,_ in cityBusStops] 
-
+#todo: finish this function
+def getBusStopCodeFromInput(stopInput, cityBusStops):
+    pass
 
 def getBusStopNameFromStopCode(stopNo, cityBusStops):
     cityBusStopNumbers = [int(x) if x != '' else x for x,_ in cityBusStops] 
@@ -191,6 +190,12 @@ def getRouteNumberInput(routes):
     print("You have entered an invalid route number %d times. Please start again from beginning.")
     exit(1)
 
+# Have the user enter bus stop code, followed by a single bus route
+def parseStopAndRouteInput(inputText):
+    inputWords = inputText.split()
+    route = inputWords[-1]
+    stop = " ".join(inputWords[:-1])
+    return stop, route
 
 def main():
     cityBusStops = getAllBusStops("google_transit/stops.txt")
