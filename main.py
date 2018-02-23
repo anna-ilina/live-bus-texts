@@ -11,7 +11,8 @@ MAX_TRIES_TO_ENTER_VALID_ROUTE_NO = 5
 #todo: set a limit on number of routes a user can enter at a time. To stay within text message limit.
 #todo: deal with "STATION" vs "STN" text input
 #todo: check why some STOP_CODES in stops.txt correspond to several different STOP_ID's ?
-#todo: some bus stations are named unintuitively, such as "BASELINE 1B". Fix
+#todo: some bus stations are named unintuitively, such as "BASELINE 1B". Fix.
+#todo: new users need to be verified (?)
 
 
 def defaultParams():
@@ -42,8 +43,12 @@ def parseRouteSummaryStop(r):
 
 def printRoutesForStop(stopNo, stopName, routes):
     print("All routes for %s (stop#%s):") % (stopName, stopNo)
+    result = ""
     for route in routes:
         print ("%d %s") % (route[0], route[1])
+        result = result + ("%d %s\n") % (route[0], route[1])
+    return result
+
 
 
 def getNextTripsForStop(routeNo, stopNo):
@@ -82,13 +87,18 @@ def parseNextTripsForStop(r):
 
 
 def printNextTripsForStop(tripsByDirection):
+    result = ""
     for direction in tripsByDirection:
         print("Next %s trips:") % (direction['Direction'])
+        result = result + ("Next %s trips:\n") % (direction['Direction'])
         for trip in direction['Trips']:
             if trip[3] == True:             # arrival time is live (gps-adjusted)
                 print("%d %s arrives in %d minutes (GPS).") % (trip[0], trip[1], trip[2])
+                result = result + ("%d %s arrives in %d minutes (GPS).\n") % (trip[0], trip[1], trip[2])
             else:                           # GPS data not available. Arrival time by schedule
                 print("%d %s arrives in %d minutes (not GPS).") % (trip[0], trip[1], trip[2])
+                result = result + ("%d %s arrives in %d minutes (not GPS).\n") % (trip[0], trip[1], trip[2])
+    return result
 
 
 def getNextTripsForStopAllRoutes(stopNo):
@@ -117,7 +127,6 @@ def getBusStopInput(cityBusStops):
     cityBusStopNames = [y.replace('.', "") for y in cityBusStopNames]
     cityBusStopNames = [y.upper() for y in cityBusStopNames]
     cityBusStopNames = [y.replace("\\", "/") for y in cityBusStopNames] # replace back slashes with forward slashes
-
 
     while(True):
         busStopInput = raw_input("Please enter bus stop name or 4-digit stop number: ")
@@ -190,20 +199,17 @@ def main():
     stopName = getBusStopNameFromStopCode(stopNo, cityBusStops)
     print("You have selected %s (stop#%d).") % (stopName, stopNo)
 
-
     r = getRouteSummaryStop(stopNo)
     stopNo, stopName, routes = parseRouteSummaryStop(r)
-    printRoutesForStop (stopNo, stopName, routes)
-
+    resultText = printRoutesForStop (stopNo, stopName, routes)
 
     routeNumbers = getRouteNumberInput(routes)
     for routeNo in routeNumbers:
         r = getNextTripsForStop(routeNo, stopNo)
         trips = parseNextTripsForStop(r)
-        printNextTripsForStop(trips)
+        resultText = printNextTripsForStop(trips)
 
     # r = getNextTripsForStopAllRoutes(3017)
-
 
 
 if __name__ == '__main__':
