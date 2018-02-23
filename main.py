@@ -93,15 +93,16 @@ def parseNextTripsForStop(r):
 def printNextTripsForStop(tripsByDirection):
     result = ""
     for direction in tripsByDirection:
-        print("Next %s trips:") % (direction['Direction'])
-        result = result + ("Next %s trips:\n") % (direction['Direction'])
+        print(direction)
+        print("Next {} trips:".format(direction['Direction']))
+        result = result + ("Next {} trips:\n".format(direction['Direction']))
         for trip in direction['Trips']:
             if trip[3] == True:             # arrival time is live (gps-adjusted)
-                print("%d %s arrives in %d minutes (GPS).") % (trip[0], trip[1], trip[2])
-                result = result + ("%d %s arrives in %d minutes (GPS).\n") % (trip[0], trip[1], trip[2])
+                print("{} {} arrives in {} minutes (GPS).".format(trip[0], trip[1], trip[2]))
+                result = result + ("{} {} arrives in {} minutes (GPS).\n".format(trip[0], trip[1], trip[2]))
             else:                           # GPS data not available. Arrival time by schedule
-                print("%d %s arrives in %d minutes (not GPS).") % (trip[0], trip[1], trip[2])
-                result = result + ("%d %s arrives in %d minutes (not GPS).\n") % (trip[0], trip[1], trip[2])
+                print("{} {} arrives in {} minutes (not GPS).".format(trip[0], trip[1], trip[2]))
+                result = result + ("{} {} arrives in {} minutes (not GPS).\n".format(trip[0], trip[1], trip[2]))
     return result
 
 
