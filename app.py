@@ -1,5 +1,5 @@
 from flask import Flask, request
-from twilio import twiml
+from twilio.twiml.messaging_response import MessagingResponse
 
 #import * from main
 
@@ -18,7 +18,7 @@ def sms():
     number = request.form['From']
     message_body = request.form['Body']
 
-    resp = twiml.Response()
+    resp = MessagingResponse()
     resp.message('Hello {}, you said: {}'.format(number, message_body))
     return str(resp)
 
