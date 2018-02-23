@@ -199,7 +199,7 @@ def parseStopAndRouteInput(inputText):
     inputWords = inputText.split()
     route = inputWords[-1]
     stop = " ".join(inputWords[:-1])
-    return stop, route
+    return int(stop), int(route)
 
 def main():
     cityBusStops = getAllBusStops("google_transit/stops.txt")

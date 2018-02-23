@@ -18,9 +18,9 @@ def sms():
     number = request.form['From']
     message_body = request.form['Body']
 
-    bus, route = parseStopAndRouteInput(message_body)
+    stopNo, routeNo = parseStopAndRouteInput(message_body)
 
-    r = getNextTripsForStop(routeNo, stopNo)
+    r = getNextTripsForStop(routeNo, stopNo)    #todo: reverse order of params for consistency
     trips = parseNextTripsForStop(r)
     resultText = printNextTripsForStop(trips)
 
