@@ -2,6 +2,7 @@
 import os
 import json
 import requests
+import psycopg2
 
 
 OCTRANSPO_ID = os.environ['OCTRANSPO_ID']
