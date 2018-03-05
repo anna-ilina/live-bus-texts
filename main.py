@@ -262,15 +262,19 @@ def parseStopAndRouteInput(inputText, cur):
     if isValidStopCode(stop, cur):
         return int(stop), int(route)
     else:
-        stopCode = getBusStopCodeFromStopName(stop, cur)
+        #stopCode = getBusStopCodeFromStopName(stop, cur)
         try:
             print(stop)
             stopCode = getBusStopCodeFromStopName(stop, cur)
             #todo: check if bad stopname, will it cause exception?
             return int(stopCode), int(route)
-        except:
+        except psycopg2.Error, e:
             print("Invalid stop code or stop name.")
-            return None, None
+            print(e.diag.severity)
+            print(e.diag.message_primary)
+    print(e.diag.severity)
+    print(e.diag.message_primary)
+    return None, None
 
 
 def main():
