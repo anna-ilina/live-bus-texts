@@ -28,7 +28,7 @@ def defaultParams():
 
 def getRouteSummaryStop(stopCode):
     payload = defaultParams()
-    payload['stopCode'] = stopCode
+    payload['stopNo'] = stopCode
     r = requests.post(BASE_URL + "GetRouteSummaryForStop", params=payload)
     return r.json()
 
@@ -57,11 +57,10 @@ def printRoutesForStop(stopCode, stopName, routes):
     return result
 
 
-
 def getNextTripsForStop(stopCode, routeNo):
     payload = defaultParams()
     payload['routeNo'] = routeNo
-    payload['stopCode'] = stopCode
+    payload['stopNo'] = stopCode
     r = requests.post(BASE_URL + "GetNextTripsForStop", params=payload)
     return r.json()
 
@@ -189,11 +188,17 @@ def getBusStopInput(cityBusStops):
 
 #todo: finish function
 def isValidStopCode(stopCode, cur):
-    cur.execute("SELECT * FROM stops WHERE stop_code = %s", (stopCode,))
-    # what is returned if invalid stop?
-    print(cur.fetchone())
-    print(cur.fetchall())
-    return True
+    try:
+        cur.execute("SELECT * FROM stops WHERE stop_code = %s", (stopCode,))
+        print(cur.fetchone()) # returns None, if invalid stop
+        print(cur.fetchall()) # returns [], if invalid stop
+        if cur.fetchone is None:
+            return False
+        else:
+            return True
+    except:
+        print("Invalid stop code")
+        return False
 
 
 def getBusStopNameFromStopCode(stopCode, cur):
