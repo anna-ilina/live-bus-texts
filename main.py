@@ -186,6 +186,17 @@ def getBusStopInput(cityBusStops):
 #     stopName = cityBusStops[index][1]
 #     return stopName
 
+def formatStopName(busStopInput):
+    busStopInput = busStopInput.upper()
+    busStopInput = busStopInput.replace("'", "")        #get rid of quotes
+    busStopInput = busStopInput.replace(".", "")        #get rid of periods
+    busStopInput = busStopInput.replace("/", " / ")
+    busStopInput = busStopInput.replace(" AND ", " / ")
+    busStopInput = busStopInput.replace("&", " / ")
+    busStopInput = busStopInput.replace("+", " / ")
+    busStopInput = ' '.join(busStopInput.split())       #get rid of double spaces
+    return busStopInput
+
 #todo: finish function
 def isValidStopCode(stopCode, cur):
     try:
@@ -204,10 +215,11 @@ def isValidStopCode(stopCode, cur):
 
 def getBusStopNameFromStopCode(stopCode, cur):
     cur.execute("SELECT stop_name FROM stops WHERE stop_code = %s", (stopCode,))
-    return cur.fetchone[0] #todo: what if null value?
+    return cur.fetchone()[0] #todo: what if null value?
 
 
 def getBusStopCodeFromStopName(stopName, cur):
+    stopName = formatStopName(stopName)
     cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
     return cur.fetchone()[0]
 
