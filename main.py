@@ -252,7 +252,7 @@ def parseStopAndRouteInput(inputText, cur):
             return int(stopCode), int(route)
         except:
             print("Invalid stop code or stop name.")
-            return False
+            return None, None
 
 
 def main():

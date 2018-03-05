@@ -36,14 +36,16 @@ def sms():
     message_body = request.form['Body']
 
     stopCode, routeNo = parseStopAndRouteInput(message_body, cur)
-
-    print("stopCode = " + str(stopCode))
-    print("routeNo = " + str(routeNo))
-    r = getNextTripsForStop(stopCode, routeNo)    
-    print("r = " + str(r))
-    trips = parseNextTripsForStop(r)
-    print("trips = " + str(trips))
-    resultText = printNextTripsForStop(stopCode, trips, cur)
+    if stopCode is None or routeNo is None:
+        resultText = "Invalid stop or route. Please again."
+    else:
+        print("stopCode = " + str(stopCode))
+        print("routeNo = " + str(routeNo))
+        r = getNextTripsForStop(stopCode, routeNo)    
+        print("r = " + str(r))
+        trips = parseNextTripsForStop(r)
+        print("trips = " + str(trips))
+        resultText = printNextTripsForStop(stopCode, trips, cur)
 
     resp = MessagingResponse()
     # resp.message('Hello {}, you said: {}'.format(number, message_body))
