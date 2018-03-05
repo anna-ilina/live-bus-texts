@@ -1,11 +1,11 @@
-from auth import OCTRANSPO_ID, OCTRANSPO_KEY
+#from auth import OCTRANSPO_ID, OCTRANSPO_KEY
 import os
 import json
 import requests
 
 
-# OCTRANSPO_ID = os.environ['OCTRANSPO_ID']
-# OCTRANSPO_KEY = os.environ['OCTRANSPO_KEY']
+OCTRANSPO_ID = os.environ['OCTRANSPO_ID']
+OCTRANSPO_KEY = os.environ['OCTRANSPO_KEY']
 BASE_URL = "https://api.octranspo1.com/v1.2/"
 MAX_TRIES_TO_ENTER_VALID_ROUTE_NO = 5
 
