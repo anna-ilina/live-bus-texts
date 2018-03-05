@@ -188,7 +188,7 @@ def getBusStopInput(cityBusStops):
 
 def formatStopName(busStopInput):
     busStopInput = busStopInput.upper()
-    busStopInput = busStopInput.replace("'", "")        #get rid of quotes
+    busStopInput = busStopInput.replace("'", "")        #get rid of quotes      #todo: format db similarly
     busStopInput = busStopInput.replace(".", "")        #get rid of periods
     busStopInput = busStopInput.replace("/", " / ")
     busStopInput = busStopInput.replace(" AND ", " / ")
@@ -220,6 +220,7 @@ def getBusStopNameFromStopCode(stopCode, cur):
 
 def getBusStopCodeFromStopName(stopName, cur):
     stopName = formatStopName(stopName)
+    print(stopName)
     cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
     return cur.fetchone()[0]
 
@@ -258,6 +259,7 @@ def parseStopAndRouteInput(inputText, cur):
         return int(stop), int(route)
     else:
         try:
+            print(stop)
             stopCode = getBusStopCodeFromStopName(stop, cur)
             #todo: check if bad stopname, will it cause exception?
             return int(stopCode), int(route)
