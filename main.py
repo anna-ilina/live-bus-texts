@@ -190,9 +190,10 @@ def getBusStopInput(cityBusStops):
 def isValidStopCode(stopCode, cur):
     try:
         cur.execute("SELECT * FROM stops WHERE stop_code = %s", (stopCode,))
-        print(cur.fetchone()) # returns None, if invalid stop
-        print(cur.fetchall()) # returns [], if invalid stop
-        if cur.fetchone is None:
+        # print(cur.fetchone()) # returns None, if invalid stop
+        # print(cur.fetchall()) # returns [], if invalid stop
+        if cur.fetchone() is None:
+            print("Invalid stop code")
             return False
         else:
             return True
@@ -203,14 +204,11 @@ def isValidStopCode(stopCode, cur):
 
 def getBusStopNameFromStopCode(stopCode, cur):
     cur.execute("SELECT stop_name FROM stops WHERE stop_code = %s", (stopCode,))
-    stopName = cur.fetchone()[0]
-    print(stopName)
-    return stopName #todo: what if null value?
+    return cut.fetchone[0] #todo: what if null value?
 
 
 def getBusStopCodeFromStopName(stopName, cur):
     cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
-    #print(cur.fetchone())
     return cur.fetchone()[0]
 
 
