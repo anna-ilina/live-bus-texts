@@ -204,7 +204,7 @@ def isValidStopCode(stopCode, cur):
 
 def getBusStopNameFromStopCode(stopCode, cur):
     cur.execute("SELECT stop_name FROM stops WHERE stop_code = %s", (stopCode,))
-    return cut.fetchone[0] #todo: what if null value?
+    return cur.fetchone[0] #todo: what if null value?
 
 
 def getBusStopCodeFromStopName(stopName, cur):
