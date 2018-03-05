@@ -35,7 +35,7 @@ def sms():
     number = request.form['From']
     message_body = request.form['Body']
 
-    stopCode, routeNo = parseStopAndRouteInput(message_body)
+    stopCode, routeNo = parseStopAndRouteInput(message_body, cur)
 
     print("stopCode = " + str(stopCode))
     print("routeNo = " + str(routeNo))
@@ -43,7 +43,7 @@ def sms():
     print("r = " + str(r))
     trips = parseNextTripsForStop(r)
     print("trips = " + str(trips))
-    resultText = printNextTripsForStop(stopCode, trips)
+    resultText = printNextTripsForStop(stopCode, trips, cur)
 
     resp = MessagingResponse()
     # resp.message('Hello {}, you said: {}'.format(number, message_body))

@@ -93,8 +93,8 @@ def parseNextTripsForStop(r):
     return trips
 
 
-def printNextTripsForStop(stopCode, tripsByDirection):
-    stopName = getBusStopNameFromStopCode(stopCode)
+def printNextTripsForStop(stopCode, tripsByDirection, cur):
+    stopName = getBusStopNameFromStopCode(stopCode, cur)
     result = ""
     print(stopName)
     result = stopName + "\n"
@@ -188,7 +188,7 @@ def getBusStopInput(cityBusStops):
 #     return stopName
 
 #todo: finish function
-def isValidStopCode(stopCode):
+def isValidStopCode(stopCode, cur):
     cur.execute("SELECT * FROM stops WHERE stop_code = %s", (stopCode,))
     # what is returned if invalid stop?
     print(cur.fetchone())
@@ -196,13 +196,13 @@ def isValidStopCode(stopCode):
     return True
 
 
-def getBusStopNameFromStopCode(stopCode):
+def getBusStopNameFromStopCode(stopCode, cur):
     cur.execute("SELECT stop_name FROM stops WHERE stop_code = %s", (stopCode,))
     print(cur.fetchone())
     return cur.fetchone()[0] #todo: what if null value?
 
 
-def getBusStopCodeFromStopName(stopName):
+def getBusStopCodeFromStopName(stopName, cur):
     cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
     print(cur.fetchone())
     return cur.fetchone()[0]
@@ -234,15 +234,15 @@ def getRouteNumberInput(routes):
 
 
 # Have the user enter bus stop code, followed by a single bus route
-def parseStopAndRouteInput(inputText):
+def parseStopAndRouteInput(inputText, cur):
     inputWords = inputText.split()
     route = inputWords[-1]
     stop = " ".join(inputWords[:-1])
-    if isValidStopCode(stop):
+    if isValidStopCode(stop, cur):
         return int(stop), int(route)
     else:
         try:
-            stopCode = getBusStopCodeFromStopName(stop)
+            stopCode = getBusStopCodeFromStopName(stop, cur)
             #todo: check if bad stopname, will it cause exception?
             return int(stopCode), int(route)
         except:
