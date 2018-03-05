@@ -1,37 +1,40 @@
-# from auth import OCTRANSPO_ID, OCTRANSPO_KEY
+from auth import OCTRANSPO_ID, OCTRANSPO_KEY
 import os
 import json
 import requests
 
-OCTRANSPO_ID = os.environ['OCTRANSPO_ID']
-OCTRANSPO_KEY = os.environ['OCTRANSPO_KEY']
 
-baseURL = "https://api.octranspo1.com/v1.2/"
+# OCTRANSPO_ID = os.environ['OCTRANSPO_ID']
+# OCTRANSPO_KEY = os.environ['OCTRANSPO_KEY']
+BASE_URL = "https://api.octranspo1.com/v1.2/"
 MAX_TRIES_TO_ENTER_VALID_ROUTE_NO = 5
+
 
 #todo: decode accented french vowels
 #todo: allow user to retry if they entered the wrong stop code/name. Use input key, maybe "restart"
 #todo: some stops serve too many routes to fit in one text. Shorten output.
 #todo: set a limit on number of routes a user can enter at a time. To stay within text message limit.
 #todo: deal with "STATION" vs "STN" text input
-#todo: check why some STOP_CODES in stops.txt correspond to several different STOP_ID's ?
-#todo: some bus stations are named unintuitively, such as "BASELINE 1B". Fix.
-#todo: new users need to be verified (?)
+#todo: check why some STOP_CODES in stops.txt are not unique (correspond to several different STOP_ID's)?
+#todo: some bus stations are named unintuitively, such as "BASELINE 1B". Fix. --> "BASELINE STATION"
+#todo: setup database and store cityBusStops information there
+#todo: look into why some bus stops have missing stop_code in google_transit/stops.txt
+
 
 
 def defaultParams():
     return {'appID': OCTRANSPO_ID, 'apiKey': OCTRANSPO_KEY, 'format': "JSON"}
 
 
-def getRouteSummaryStop(stopNo):
+def getRouteSummaryStop(stopCode):
     payload = defaultParams()
-    payload['stopNo'] = stopNo
-    r = requests.post(baseURL + "GetRouteSummaryForStop", params=payload)
+    payload['stopCode'] = stopCode
+    r = requests.post(BASE_URL + "GetRouteSummaryForStop", params=payload)
     return r.json()
 
 
 def parseRouteSummaryStop(r):
-    stopNo = int(r['GetRouteSummaryForStopResult']['StopNo'])
+    stopCode = int(r['GetRouteSummaryForStopResult']['stopCode'])
     stopName = r['GetRouteSummaryForStopResult']['StopDescription']
     routes = []
     for route in r['GetRouteSummaryForStopResult']['Routes']['Route']:
@@ -42,24 +45,24 @@ def parseRouteSummaryStop(r):
         else:
             direction = route['Direction']#.encode('utf-8')
             routes.append([routeNo, direction])
-    return stopNo, stopName, routes
+    return stopCode, stopName, routes
 
 
-def printRoutesForStop(stopNo, stopName, routes):
-    print("All routes for %s (stop#%s):") % (stopName, stopNo)
+def printRoutesForStop(stopCode, stopName, routes):
+    print("All routes for {} (stop#{}):".format(stopName, stopCode))
     result = ""
     for route in routes:
-        print ("%d %s") % (route[0], route[1])
-        result = result + ("%d %s\n") % (route[0], route[1])
+        print ("{} {}".format(route[0], route[1]))
+        result = result + ("{} {}\n".format(route[0], route[1]))
     return result
 
 
 
-def getNextTripsForStop(routeNo, stopNo):
+def getNextTripsForStop(stopCode, routeNo):
     payload = defaultParams()
     payload['routeNo'] = routeNo
-    payload['stopNo'] = stopNo
-    r = requests.post(baseURL + "GetNextTripsForStop", params=payload)
+    payload['stopCode'] = stopCode
+    r = requests.post(BASE_URL + "GetNextTripsForStop", params=payload)
     return r.json()
 
 
@@ -76,7 +79,7 @@ def parseNextTripsForStop(r):
         direction = routeDir['Direction']
         tripsThisDirection = []
         if routeDir['Trips'] == {}:
-            print("No more buses scheduled today for route %d %s.") % (int(routeNo), direction)
+            print("No more buses scheduled today for route {} {}.".format(int(routeNo), direction))
         else:
             for trip in routeDir['Trips']['Trip']:
                 timeEstimateIsLive = True
@@ -90,8 +93,11 @@ def parseNextTripsForStop(r):
     return trips
 
 
-def printNextTripsForStop(tripsByDirection):
+def printNextTripsForStop(stopCode, tripsByDirection):
+    stopName = getBusStopNameFromStopCode(stopCode)
     result = ""
+    print(stopName)
+    result = stopName + "\n"
     for direction in tripsByDirection:
         print(direction)
         print("Next {} trips:".format(direction['Direction']))
@@ -106,23 +112,34 @@ def printNextTripsForStop(tripsByDirection):
     return result
 
 
-def getNextTripsForStopAllRoutes(stopNo):
+def getNextTripsForStopAllRoutes(stopCode):
     payload = defaultParams()
-    payload['stopNo'] = stopNo
-    r = requests.post(baseURL + "GetNextTripsForStopAllRoutes", params=payload)
+    payload['stopCode'] = stopCode
+    r = requests.post(BASE_URL + "GetNextTripsForStopAllRoutes", params=payload)
     return r.json()
 
 
+# NOTE: stops table requires stop_id, stop_code or id values specified.
+# example payload: {'appID': OCTRANSPO_ID, 'apiKey': OCTRANSPO_KEY, 'format': 'json', 'table': 'stops', 'direction': 'ASC', 'column': 'stop_id', 'value': 'AA010'}
+# def getBusStopNameFromStopCodeByAPI(stopCode):
+#     payload = defaultParams()
+#     payload['table'] = "stops"
+#     payload['column'] = ...
+#     payload['value'] = ...
+#     r = requests.post(BASE_URL + "Gtfs", params = payload)
+#     return r.json()
+
+
 def getAllBusStops(file):
-    with open(file, 'rb') as infile:
+    with open(file, 'r') as infile:
         lines = infile.readlines()
         busStops = []
         for line in lines[1:]:      #ignore header line
-            line = line.split(",")
-            stopNo = line[1]
+            line = line.split(',')
+            stopCode = line[1]
             stopName = line[2]
             stopName = stopName.replace("\"", "") # get rid of quotation marks
-            busStops.append([stopNo, stopName])
+            busStops.append([stopCode, stopName])
     return busStops
 
 
@@ -134,7 +151,7 @@ def getBusStopInput(cityBusStops):
     cityBusStopNames = [y.replace("\\", "/") for y in cityBusStopNames] # replace back slashes with forward slashes
 
     while(True):
-        busStopInput = raw_input("Please enter bus stop name or 4-digit stop number: ")
+        busStopInput = input("Please enter bus stop name or 4-digit stop number: ")
         try:
             # see if user entered a bus stop code
             stop = busStopInput.strip()
@@ -155,20 +172,40 @@ def getBusStopInput(cityBusStops):
             busStopInput = ' '.join(busStopInput.split())       #get rid of double spaces
             try:
                 index = cityBusStopNames.index(busStopInput)
-                stopNo = cityBusStops[index][0]
-                return int(stopNo)
+                stopCode = cityBusStops[index][0]
+                return int(stopCode)
             except:
                 print("Unable to find stop with given name. Please try again.")
 
-#todo: finish this function
-def getBusStopCodeFromInput(stopInput, cityBusStops):
-    pass
+# #todo: finish this function
+# def getBusStopCodeFromInput(stopInput, cityBusStops):
+#     pass
 
-def getBusStopNameFromStopCode(stopNo, cityBusStops):
-    cityBusStopNumbers = [int(x) if x != '' else x for x,_ in cityBusStops] 
-    index = cityBusStopNumbers.index(stopNo)
-    stopName = cityBusStops[index][1]
-    return stopName
+# def getBusStopNameFromStopCode(stopCode, cityBusStops):
+#     cityBusStopNumbers = [int(x) if x != '' else x for x,_ in cityBusStops] 
+#     index = cityBusStopNumbers.index(stopCode)
+#     stopName = cityBusStops[index][1]
+#     return stopName
+
+#todo: finish function
+def isValidStopCode(stopCode):
+    cur.execute("SELECT * FROM stops WHERE stop_code = %s", (stopCode,))
+    # what is returned if invalid stop?
+    print(cur.fetchone())
+    print(cur.fetchall())
+    return True
+
+
+def getBusStopNameFromStopCode(stopCode):
+    cur.execute("SELECT stop_name FROM stops WHERE stop_code = %s", (stopCode,))
+    print(cur.fetchone())
+    return cur.fetchone()[0] #todo: what if null value?
+
+
+def getBusStopCodeFromStopName(stopName):
+    cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
+    print(cur.fetchone())
+    return cur.fetchone()[0]
 
 
 def getRouteNumberInput(routes):
@@ -176,7 +213,7 @@ def getRouteNumberInput(routes):
     validRouteNumbers = [x for x,_ in routes]
     routeNumbers = []
     while(counter < MAX_TRIES_TO_ENTER_VALID_ROUTE_NO):
-        routeNoInput = raw_input("Please enter the route number(s) you are interested in (just the number(s)): ")
+        routeNoInput = input("Please enter the route number(s) you are interested in (just the number(s)): ")
         routeNoInput = routeNoInput.replace(",", " ")   #in case user separated number by commas
         routes = routeNoInput.split()
         for route in routes:
@@ -185,39 +222,50 @@ def getRouteNumberInput(routes):
                 if routeNo in validRouteNumbers:
                     routeNumbers.append(routeNo)
                 else: 
-                    print("Selected stop does not service route number %d. Try again.") %(routeNo)
+                    print("Selected stop does not service route number {}. Try again.".format(routeNo))
                     break
             except:
                 print("Non-numeric route number entered. Try again.")
                 break
             counter += 1
         return routeNumbers
-    print("You have entered an invalid route number %d times. Please start again from beginning.")
+    print("You have entered an invalid route number {} times. Please start again from beginning.".format(counter))
     exit(1)
+
 
 # Have the user enter bus stop code, followed by a single bus route
 def parseStopAndRouteInput(inputText):
     inputWords = inputText.split()
     route = inputWords[-1]
     stop = " ".join(inputWords[:-1])
-    return int(stop), int(route)
+    if isValidStopCode(stop):
+        return int(stop), int(route)
+    else:
+        try:
+            stopCode = getBusStopCodeFromStopName(stop)
+            #todo: check if bad stopname, will it cause exception?
+            return int(stopCode), int(route)
+        except:
+            print("Invalid stop code or stop name.")
+            return False
+
 
 def main():
     cityBusStops = getAllBusStops("google_transit/stops.txt")
 
-    stopNo = getBusStopInput(cityBusStops)
-    stopName = getBusStopNameFromStopCode(stopNo, cityBusStops)
-    print("You have selected %s (stop#%d).") % (stopName, stopNo)
+    stopCode = getBusStopInput(cityBusStops)
+    stopName = getBusStopNameFromStopCode(stopCode, cityBusStops)
+    print("You have selected {} (stop#{}).".format(stopName, stopCode))
 
-    r = getRouteSummaryStop(stopNo)
-    stopNo, stopName, routes = parseRouteSummaryStop(r)
-    resultText = printRoutesForStop (stopNo, stopName, routes)
+    r = getRouteSummaryStop(stopCode)
+    stopCode, stopName, routes = parseRouteSummaryStop(r)
+    resultText = printRoutesForStop (stopCode, stopName, routes)
 
     routeNumbers = getRouteNumberInput(routes)
     for routeNo in routeNumbers:
-        r = getNextTripsForStop(routeNo, stopNo)
+        r = getNextTripsForStop(stopCode, routeNo)
         trips = parseNextTripsForStop(r)
-        resultText = printNextTripsForStop(trips)
+        resultText = printNextTripsForStop(stopCode, trips)
 
     # r = getNextTripsForStopAllRoutes(3017)
 

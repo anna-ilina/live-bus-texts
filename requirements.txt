@@ -2,3 +2,4 @@ Requests
 twilio
 Flask
 gunicorn
+psycopg2
