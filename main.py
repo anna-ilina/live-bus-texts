@@ -222,7 +222,10 @@ def getBusStopCodeFromStopName(stopName, cur):
     stopName = formatStopName(stopName)
     print(stopName)
     cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
-    return cur.fetchone()[0]
+    stopCode = cur.fetchone()[0]
+    print(stopCode)
+    print(cur.fetchall())
+    return stopCode
 
 
 def getRouteNumberInput(routes):
