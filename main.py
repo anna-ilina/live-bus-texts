@@ -221,8 +221,9 @@ def getBusStopNameFromStopCode(stopCode, cur):
 def getBusStopCodeFromStopName(stopName, cur):
     stopName = formatStopName(stopName)
     print(stopName)
-    cur.execute("SELECT stop_code FROM stops WHERE stop_name = '%s'", (stopName,))
+    cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
     stopCode = cur.fetchone()[0]
+    print("test")
     print(stopCode)
     print(cur.fetchall())
     return stopCode
@@ -261,6 +262,7 @@ def parseStopAndRouteInput(inputText, cur):
     if isValidStopCode(stop, cur):
         return int(stop), int(route)
     else:
+        stopCode = getBusStopCodeFromStopName(stop, cur)
         try:
             print(stop)
             stopCode = getBusStopCodeFromStopName(stop, cur)
