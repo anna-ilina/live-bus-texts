@@ -204,9 +204,9 @@ def getBusStopCodeFromStopName(stopName, cur):
     try:
         cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
     except:
-        return None
+        return None             # exception is thrown when incorrect input to query
     stopCode = cur.fetchone()
-    if stopCode is None:
+    if stopCode is None:        # None is returned when query matched no entries in db
         return None
     stopCode = stopCode[0]
     print("test")
@@ -252,6 +252,8 @@ def parseStopAndRouteInput(inputText, cur, conn):
             print(stop)
             stopCode = getBusStopCodeFromStopName(stop, cur)
             #todo: check if bad stopname, will it cause exception?
+            if stopCode is None:
+                return None, None
             return int(stopCode), int(route)
         except psycopg2.Error as e:
             print("Invalid stop code or stop name.")
