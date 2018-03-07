@@ -202,6 +202,9 @@ def getBusStopCodeFromStopName(stopName, cur):
     stopName = formatStopName(stopName)
     print(stopName)
     cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
+    stopCode = cur.fetchon()
+    if stopCode is None:
+        return None
     stopCode = cur.fetchone()[0]
     print("test")
     print(stopCode)
