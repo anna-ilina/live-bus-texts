@@ -12,10 +12,10 @@ MAX_TRIES_TO_ENTER_VALID_ROUTE_NO = 5
 
 
 #todo: decode accented french vowels
-#todo: allow user to retry if they entered the wrong stop code/name. Use input key, maybe "restart"
-#todo: some stops serve too many routes to fit in one text. Shorten output.
-#todo: allow user to enter multiple routes
-#todo: set a limit on number of routes a user can enter at a time. To stay within text message limit.
+#todo: add option to find out which routes a stop serves (some stops serve too many routes to fit in one text. Shorten output.)
+#todo: when user enters "about" --> send a short text about the service, and how to use it (what input is expected)
+#todo: allow user to enter multiple routes (set a limit on number of routes a user can enter at a time. 
+#      To stay within text message limit. Or send multiple text messages)
 #todo: deal with "STATION" vs "STN" text input
 #todo: check why some STOP_CODES in stops.txt are not unique (correspond to several different STOP_ID's)?
 #todo: some bus stations are named unintuitively, such as "BASELINE 1B". Fix. --> "BASELINE STATION"
@@ -195,7 +195,11 @@ def isValidStopCode(stopCode, cur, conn):
 
 def getBusStopNameFromStopCode(stopCode, cur):
     cur.execute("SELECT stop_name FROM stops WHERE stop_code = %s", (stopCode,))
-    return cur.fetchone()[0] #todo: what if null value?
+    butStopNameResult = cur.fetchone()
+    if butStopNameResult is None:
+        return ""
+    else:
+        return butStopNameOutput[0]
 
 
 def getBusStopCodeFromStopName(stopName, cur):
@@ -205,10 +209,10 @@ def getBusStopCodeFromStopName(stopName, cur):
         cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
     except:
         return None             # exception is thrown when incorrect input to query
-    stopCode = cur.fetchone()
+    stopCodeResult = cur.fetchone()
     if stopCode is None:        # None is returned when query matched no entries in db
         return None
-    stopCode = stopCode[0]
+    stopCode = stopCodeResult[0]
     print("test")
     print(stopCode)
     print(cur.fetchall())
@@ -251,8 +255,7 @@ def parseStopAndRouteInput(inputText, cur, conn):
         try:
             print(stop)
             stopCode = getBusStopCodeFromStopName(stop, cur)
-            #todo: check if bad stopname, will it cause exception?
-            if stopCode is None:
+            if stopCode is None:    # None returned when input is valid (is int), but no matching entry found in db
                 return None, None
             return int(stopCode), int(route)
         except psycopg2.Error as e:

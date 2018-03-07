@@ -20,8 +20,6 @@ conn = psycopg2.connect(
 
 cur = conn.cursor()
 
-# def createStopsDatabase():
-
 @app.route("/")
 def hello():
     return "Hummus runs the world!"
@@ -54,5 +52,4 @@ def sms():
 
 
 if __name__ == "__main__":
-    #app.run(debug=True)
     app.run()
