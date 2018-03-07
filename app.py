@@ -35,7 +35,7 @@ def sms():
     number = request.form['From']
     message_body = request.form['Body']
 
-    stopCode, routeNo = parseStopAndRouteInput(message_body, cur)
+    stopCode, routeNo = parseStopAndRouteInput(message_body, cur, conn)
     if stopCode is None or routeNo is None:
         resultText = "Invalid stop or route. Please again."
     else:

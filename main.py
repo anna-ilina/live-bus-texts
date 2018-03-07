@@ -256,13 +256,14 @@ def getRouteNumberInput(routes):
 
 
 # Have the user enter bus stop code, followed by a single bus route
-def parseStopAndRouteInput(inputText, cur):
+def parseStopAndRouteInput(inputText, cur, conn):
     inputWords = inputText.split()
     route = inputWords[-1]
     stop = " ".join(inputWords[:-1])
     if isValidStopCode(stop, cur):
         return int(stop), int(route)
     else:
+        conn.rollback()
         #stopCode = getBusStopCodeFromStopName(stop, cur)
         try:
             print(stop)
@@ -273,8 +274,8 @@ def parseStopAndRouteInput(inputText, cur):
             print("Invalid stop code or stop name.")
             print(e.diag.severity)
             print(e.diag.message_primary)
-    print(e.diag.severity)
-    print(e.diag.message_primary)
+    # print(e.diag.severity)
+    # print(e.diag.message_primary)
     return None, None
 
 
