@@ -14,13 +14,12 @@ MAX_TRIES_TO_ENTER_VALID_ROUTE_NO = 5
 #todo: decode accented french vowels
 #todo: allow user to retry if they entered the wrong stop code/name. Use input key, maybe "restart"
 #todo: some stops serve too many routes to fit in one text. Shorten output.
+#todo: allow user to enter multiple routes
 #todo: set a limit on number of routes a user can enter at a time. To stay within text message limit.
 #todo: deal with "STATION" vs "STN" text input
 #todo: check why some STOP_CODES in stops.txt are not unique (correspond to several different STOP_ID's)?
 #todo: some bus stations are named unintuitively, such as "BASELINE 1B". Fix. --> "BASELINE STATION"
-#todo: setup database and store cityBusStops information there
 #todo: look into why some bus stops have missing stop_code in google_transit/stops.txt
-
 
 
 def defaultParams():
@@ -119,17 +118,6 @@ def getNextTripsForStopAllRoutes(stopCode):
     return r.json()
 
 
-# NOTE: stops table requires stop_id, stop_code or id values specified.
-# example payload: {'appID': OCTRANSPO_ID, 'apiKey': OCTRANSPO_KEY, 'format': 'json', 'table': 'stops', 'direction': 'ASC', 'column': 'stop_id', 'value': 'AA010'}
-# def getBusStopNameFromStopCodeByAPI(stopCode):
-#     payload = defaultParams()
-#     payload['table'] = "stops"
-#     payload['column'] = ...
-#     payload['value'] = ...
-#     r = requests.post(BASE_URL + "Gtfs", params = payload)
-#     return r.json()
-
-
 def getAllBusStops(file):
     with open(file, 'r') as infile:
         lines = infile.readlines()
@@ -177,15 +165,6 @@ def getBusStopInput(cityBusStops):
             except:
                 print("Unable to find stop with given name. Please try again.")
 
-# #todo: finish this function
-# def getBusStopCodeFromInput(stopInput, cityBusStops):
-#     pass
-
-# def getBusStopNameFromStopCode(stopCode, cityBusStops):
-#     cityBusStopNumbers = [int(x) if x != '' else x for x,_ in cityBusStops] 
-#     index = cityBusStopNumbers.index(stopCode)
-#     stopName = cityBusStops[index][1]
-#     return stopName
 
 def formatStopName(busStopInput):
     busStopInput = busStopInput.upper()
@@ -198,8 +177,8 @@ def formatStopName(busStopInput):
     busStopInput = ' '.join(busStopInput.split())       #get rid of double spaces
     return busStopInput
 
-#todo: finish function
-def isValidStopCode(stopCode, cur):
+
+def isValidStopCode(stopCode, cur, conn):
     try:
         cur.execute("SELECT * FROM stops WHERE stop_code = %s", (stopCode,))
         # print(cur.fetchone()) # returns None, if invalid stop
@@ -210,7 +189,7 @@ def isValidStopCode(stopCode, cur):
         else:
             return True
     except:
-        print("Invalid stop code")
+        conn.rollback()
         return False
 
 
@@ -260,11 +239,9 @@ def parseStopAndRouteInput(inputText, cur, conn):
     inputWords = inputText.split()
     route = inputWords[-1]
     stop = " ".join(inputWords[:-1])
-    if isValidStopCode(stop, cur):
+    if isValidStopCode(stop, cur, conn):
         return int(stop), int(route)
     else:
-        conn.rollback()
-        #stopCode = getBusStopCodeFromStopName(stop, cur)
         try:
             print(stop)
             stopCode = getBusStopCodeFromStopName(stop, cur)
@@ -274,8 +251,6 @@ def parseStopAndRouteInput(inputText, cur, conn):
             print("Invalid stop code or stop name.")
             print(e.diag.severity)
             print(e.diag.message_primary)
-    # print(e.diag.severity)
-    # print(e.diag.message_primary)
     return None, None
 
 
