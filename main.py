@@ -201,11 +201,14 @@ def getBusStopNameFromStopCode(stopCode, cur):
 def getBusStopCodeFromStopName(stopName, cur):
     stopName = formatStopName(stopName)
     print(stopName)
-    cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
-    stopCode = cur.fetchon()
+    try:
+        cur.execute("SELECT stop_code FROM stops WHERE stop_name = %s", (stopName,))
+    except:
+        return None
+    stopCode = cur.fetchone()
     if stopCode is None:
         return None
-    stopCode = cur.fetchone()[0]
+    stopCode = stopCode[0]
     print("test")
     print(stopCode)
     print(cur.fetchall())
