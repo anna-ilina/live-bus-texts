@@ -210,7 +210,7 @@ def getBusStopCodeFromStopName(stopName, cur):
     except:
         return None             # exception is thrown when incorrect input to query
     stopCodeResult = cur.fetchone()
-    if stopCode is None:        # None is returned when query matched no entries in db
+    if stopCodeResult is None:        # None is returned when query matched no entries in db
         return None
     stopCode = stopCodeResult[0]
     print("test")
