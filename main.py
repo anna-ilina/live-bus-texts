@@ -195,11 +195,11 @@ def isValidStopCode(stopCode, cur, conn):
 
 def getBusStopNameFromStopCode(stopCode, cur):
     cur.execute("SELECT stop_name FROM stops WHERE stop_code = %s", (stopCode,))
-    butStopNameResult = cur.fetchone()
-    if butStopNameResult is None:
+    busStopNameResult = cur.fetchone()
+    if busStopNameResult is None:
         return ""
     else:
-        return butStopNameOutput[0]
+        return busStopNameResult[0]
 
 
 def getBusStopCodeFromStopName(stopName, cur):
