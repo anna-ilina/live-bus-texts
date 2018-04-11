@@ -6,7 +6,7 @@ This project allows an Ottawa resident to text a local number with a bus stop na
 
 Suppose you want to find out what time the next <i>95</i> bus arrives at <i>Slater and Metcalfe</i> :
 
-![texting example](./img/texting_example.png)
+<img src="./img/texting_example.png" alt="texting example" width="250">
 
 All times with <i>(GPS)</i> after them indicate that the arrival time is GPS-adjusted, aka the "live" time. Any times with <i>(not GPS)</i> after them indicate that GPS is not currently available for this bus, so the time displayed is the scheduled arrival time, aka not the "live" time.
 
