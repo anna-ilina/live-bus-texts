@@ -3,6 +3,7 @@ import os
 import json
 import requests
 import psycopg2
+import unidecode
 
 
 OCTRANSPO_ID = os.environ['OCTRANSPO_ID']
@@ -20,6 +21,8 @@ MAX_TRIES_TO_ENTER_VALID_ROUTE_NO = 5
 #todo: some bus stations are named unintuitively, such as "BASELINE 1B". Fix. --> "BASELINE STATION"
 #todo: create stopcodes for bus stops have missing stop_code in google_transit/stops.txt (there are 9). 
 #      Right now these are excluded from db
+#todo: Find what is the difference between stop names A / B and B / A 
+#      why do these serve different stops? (ie "VANIER / MONTREAL 9" AND "MONTREAL / VANIER 12")
 
 
 def defaultParams():
@@ -36,14 +39,15 @@ def getRouteSummaryStop(stopCode):
 def parseRouteSummaryStop(r):
     stopCode = int(r['GetRouteSummaryForStopResult']['stopCode'])
     stopName = r['GetRouteSummaryForStopResult']['StopDescription']
+    stopName = unidecode.unidecode(stopName)    # replace french accent letters with unaccented letters, to match db
     routes = []
     for route in r['GetRouteSummaryForStopResult']['Routes']['Route']:
         routeNo = int(route['RouteNo'])
-        routeHeading = route['RouteHeading']#.encode('utf-8')
+        routeHeading = route['RouteHeading']
         if routeHeading != "":
             routes.append([routeNo, routeHeading])
         else:
-            direction = route['Direction']#.encode('utf-8')
+            direction = route['Direction']
             routes.append([routeNo, direction])
     return stopCode, stopName, routes
 
@@ -150,14 +154,7 @@ def getBusStopInput(cityBusStops):
                 print("Invalid bus stop number entered. Try again.")
         except:
             # assume user entered a bus stop name
-            busStopInput = busStopInput.upper()
-            busStopInput = busStopInput.replace("'", "")        #get rid of quotes
-            busStopInput = busStopInput.replace(".", "")        #get rid of periods
-            busStopInput = busStopInput.replace("/", " / ")
-            busStopInput = busStopInput.replace(" AND ", " / ")
-            busStopInput = busStopInput.replace("&", " / ")
-            busStopInput = busStopInput.replace("+", " / ")
-            busStopInput = ' '.join(busStopInput.split())       #get rid of double spaces
+            busStopInput = formatStopName(busStopInput)
             try:
                 index = cityBusStopNames.index(busStopInput)
                 stopCode = cityBusStops[index][0]
