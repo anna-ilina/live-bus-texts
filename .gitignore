@@ -6,4 +6,3 @@ google_transit/
 send_sms.py
 run.py
 test.py
-generateStopsTableSqlCommands.py

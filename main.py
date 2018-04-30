@@ -11,7 +11,6 @@ BASE_URL = "https://api.octranspo1.com/v1.2/"
 MAX_TRIES_TO_ENTER_VALID_ROUTE_NO = 5
 
 
-#todo: decode accented french vowels
 #todo: add option to find out which routes a stop serves (some stops serve too many routes to fit in one text. Shorten output.)
 #todo: when user enters "about" --> send a short text about the service, and how to use it (what input is expected)
 #todo: allow user to enter multiple routes (set a limit on number of routes a user can enter at a time. 
@@ -19,7 +18,8 @@ MAX_TRIES_TO_ENTER_VALID_ROUTE_NO = 5
 #todo: deal with "STATION" vs "STN" text input
 #todo: check why some STOP_CODES in stops.txt are not unique (correspond to several different STOP_ID's)?
 #todo: some bus stations are named unintuitively, such as "BASELINE 1B". Fix. --> "BASELINE STATION"
-#todo: look into why some bus stops have missing stop_code in google_transit/stops.txt
+#todo: create stopcodes for bus stops have missing stop_code in google_transit/stops.txt (there are 9). 
+#      Right now these are excluded from db
 
 
 def defaultParams():
