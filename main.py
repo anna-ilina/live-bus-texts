@@ -39,7 +39,6 @@ def getRouteSummaryStop(stopCode):
 def parseRouteSummaryStop(r):
     stopCode = int(r['GetRouteSummaryForStopResult']['stopCode'])
     stopName = r['GetRouteSummaryForStopResult']['StopDescription']
-    stopName = unidecode.unidecode(stopName)    # replace french accent letters with unaccented letters, to match db
     routes = []
     for route in r['GetRouteSummaryForStopResult']['Routes']['Route']:
         routeNo = int(route['RouteNo'])
@@ -246,6 +245,7 @@ def parseStopAndRouteInput(inputText, cur, conn):
     inputWords = inputText.split()
     route = inputWords[-1]
     stop = " ".join(inputWords[:-1])
+    stop = unidecode.unnidecode(stop) # replace accented french letters with unaccented letters
     if isValidStopCode(stop, cur, conn):
         return int(stop), int(route)
     else:
