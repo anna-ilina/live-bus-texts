@@ -245,7 +245,7 @@ def parseStopAndRouteInput(inputText, cur, conn):
     inputWords = inputText.split()
     route = inputWords[-1]
     stop = " ".join(inputWords[:-1])
-    stop = unidecode.unnidecode(stop) # replace accented french letters with unaccented letters
+    stop = unidecode.unidecode(stop) # replace accented french letters with unaccented letters
     if isValidStopCode(stop, cur, conn):
         return int(stop), int(route)
     else:
