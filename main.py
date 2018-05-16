@@ -4,6 +4,7 @@ import json
 import requests
 import psycopg2
 import unidecode
+from operator import itemgetter
 
 
 OCTRANSPO_ID = os.environ['OCTRANSPO_ID']
@@ -100,7 +101,8 @@ def printNextTripsForStop(stopCode, tripsByDirection, cur):
     result = ""
     print(stopName)
     result = stopName + "\n"
-    for direction in tripsByDirection:
+    tripsByDirectionSorted = sorted(tripsByDirection, key = itemgetter('Direction'), reverse = False) 
+    for direction in tripsByDirectionSorted:
         print(direction)
         print("Next {} trips:".format(direction['Direction']))
         result = result + ("Next {} trips:\n".format(direction['Direction']))
